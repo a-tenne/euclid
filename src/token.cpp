@@ -1,6 +1,6 @@
 #include "token.hpp"
 #include <unordered_map>
-#define LOOKUP_ENTRY(TOKEN) { token_kind::##TOKEN, #TOKEN }
+#define LOOKUP_ENTRY(TOKEN) { token_kind::TOKEN, #TOKEN }
 namespace euclid
 {
 
