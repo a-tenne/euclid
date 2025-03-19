@@ -1,10 +1,11 @@
 #include "token.hpp"
-#include <unordered_map>
 #define LOOKUP_ENTRY(TOKEN) { token_kind::TOKEN, #TOKEN }
 namespace euclid
 {
 
-static const std::unordered_map<token_kind, std::string> str_lookup = {
+using std::string;
+
+const std::unordered_map<token_kind, string> token::str_lookup = {
   LOOKUP_ENTRY (INVALID),  LOOKUP_ENTRY (AND),        LOOKUP_ENTRY (ARRAY),
   LOOKUP_ENTRY (BEGIN),    LOOKUP_ENTRY (CASE),       LOOKUP_ENTRY (CONST),
   LOOKUP_ENTRY (DIV),      LOOKUP_ENTRY (DO),         LOOKUP_ENTRY (DOWNTO),
@@ -29,116 +30,110 @@ static const std::unordered_map<token_kind, std::string> str_lookup = {
   LOOKUP_ENTRY (EOF)
 };
 
-prim_token::prim_token (position pos)
-    : m_kind (token_kind::INVALID), m_pos (pos)
-{
-}
+token::token (position pos) : m_kind (token_kind::INVALID), m_pos (pos) {}
 
-prim_token::prim_token (token_kind kind, position pos)
-    : m_kind (kind), m_pos (pos)
-{
-}
+token::token (token_kind kind, position pos) : m_kind (kind), m_pos (pos) {}
 
 token_kind
-prim_token::get_kind (void) const
+token::get_kind (void) const
 {
   return m_kind;
 }
 const position &
-prim_token::get_pos (void) const
+token::get_pos (void) const
 {
   return m_pos;
 }
 
-std::string
-prim_token::to_string (void) const
+string
+token::to_string (void) const
 {
   return str_lookup.at (m_kind);
 }
 
 bool_token::bool_token (position pos, bool value)
-    : prim_token (token_kind::BOOL_LIT, pos), m_value (value)
+    : token (token_kind::BOOL_LIT, pos), m_value (value)
 {
 }
 
 bool
-bool_token::get_value () const
+bool_token::get_value (void) const
 {
   return m_value;
 }
 
-std::string
+string
 bool_token::to_string (void) const
 {
-  return prim_token::to_string () + ": " + (m_value ? "TRUE" : "FALSE");
+  return token::to_string () + ": " + (m_value ? "TRUE" : "FALSE");
 }
 
 int_token::int_token (position pos, int value)
-    : prim_token (token_kind::INT_LIT, pos), m_value (value)
+    : token (token_kind::INT_LIT, pos), m_value (value)
 {
 }
 
 int
-int_token::get_value () const
+int_token::get_value (void) const
 {
   return m_value;
 }
 
-std::string
+string
 int_token::to_string (void) const
 {
-  return prim_token::to_string () + ": " + std::to_string (m_value);
+  return token::to_string () + ": " + std::to_string (m_value);
 }
 
 real_token::real_token (position pos, float value)
-    : prim_token (token_kind::REAL_LIT, pos), m_value (value)
+    : token (token_kind::REAL_LIT, pos), m_value (value)
 {
 }
 
 float
-real_token::get_value () const
+real_token::get_value (void) const
 {
   return m_value;
 }
 
-std::string
+string
 real_token::to_string (void) const
 {
-  return prim_token::to_string () + ": " + std::to_string (m_value);
+  return token::to_string () + ": " + std::to_string (m_value);
 }
 
-string_token::string_token (position pos, std::string value)
-    : prim_token (token_kind::STRING_LIT, pos), m_value (value)
+string_token::string_token (position pos, const string &value)
+    : token (token_kind::STRING_LIT, pos), m_value (value)
 {
 }
 
-const std::string &
-string_token::get_value () const
+const string &
+string_token::get_value (void) const
 {
   return m_value;
 }
 
-std::string
+string
 string_token::to_string (void) const
 {
-  return prim_token::to_string () + ": '" + m_value + "'";
+  return token::to_string () + ": '" + m_value + "'";
 }
 
-ident_token::ident_token (position pos, std::string name)
-    : prim_token (token_kind::IDENT, pos), m_name (name)
+ident_token::ident_token (position pos, const string &name)
+    : token (token_kind::IDENT, pos), m_name (name)
 {
 }
 
-const std::string &
-ident_token::get_name () const
+const string &
+ident_token::get_name (void) const
 {
   return m_name;
 }
 
-std::string
+string
 ident_token::to_string (void) const
 {
-  return prim_token::to_string () + ": " + m_name;
+  return token::to_string () + ": " + m_name;
 }
 
 } // namespace euclid
