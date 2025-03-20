@@ -73,7 +73,6 @@ lexer::read_file (const string &file_name)
   for (auto &c : m_target_str)
     c = std::tolower (static_cast<u_char> (c));
   m_current = m_target_str.c_str ();
-  std::cout << m_target_str << "\n";
 }
 
 void
