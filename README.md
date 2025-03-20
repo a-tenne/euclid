@@ -14,7 +14,6 @@ This is an ongoing project.
 - [ ] Frontend
   - [x] Lexer
   - [ ] Parser
-  - [ ] Semantic Analyzer
 - [ ] Backend
   - ...
 
