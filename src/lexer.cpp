@@ -10,8 +10,8 @@ namespace euclid
 using std::string, std::unique_ptr, std::make_unique, std::unordered_map,
     std::regex, std::map;
 
-const regex lexer::m_int_regex = regex (R"(\d+)");
-const regex lexer::m_real_regex = regex (R"(\d+\.\d+(e[\+-]?\d+)?)");
+const regex lexer::m_int_regex = regex (R"(^\d+$)");
+const regex lexer::m_real_regex = regex (R"(^\d+\.\d+(e[\+-]?\d+)?$)");
 const map<string, token_kind> lexer::m_keyword_lookup
     = { { "and", token_kind::AND },
         { "array", token_kind::ARRAY },
@@ -281,15 +281,16 @@ lexer::make_number (void)
   string num_str;
   position start = m_pos;
   while (std::isdigit (static_cast<u_char> (*m_current)) || *m_current == 'e'
-         || *m_current == '-' || *m_current == '+')
+         || *m_current == '-' || *m_current == '+' || *m_current == '.')
     {
       num_str += *m_current;
       advance ();
     }
-  if (regex_match (num_str, m_int_regex))
-    return make_unique<int_token> (start, std::stoi (num_str));
   if (regex_match (num_str, m_real_regex))
     return make_unique<real_token> (start, std::stof (num_str));
+  if (regex_match (num_str, m_int_regex))
+    return make_unique<int_token> (start, std::stoi (num_str));
+
   return make_invalid (start);
 }
 
