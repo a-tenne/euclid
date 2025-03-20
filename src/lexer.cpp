@@ -1,5 +1,10 @@
 #include "lexer.hpp"
 #include <fstream>
+#include <iostream>
+
+#define U_TOKEN(_token, position)                                             \
+  make_unique<token> (token_kind::_token, position)
+
 namespace euclid
 {
 using std::string, std::unique_ptr, std::make_unique, std::unordered_map,
@@ -43,13 +48,13 @@ const map<string, token_kind> lexer::m_keyword_lookup
         { "var", token_kind::VAR },
         { "while", token_kind::WHILE },
         { "with", token_kind::WITH } };
-const unordered_map<char, token_kind> lexer::m_char_lookup = {
-  { '+', token_kind::PLUS },     { '-', token_kind::MINUS },
-  { '*', token_kind::ASTERISK }, { '/', token_kind::SLASH },
-  { '=', token_kind::EQ },       { '[', token_kind::LBRACK },
-  { ']', token_kind::RBRACK },   { ',', token_kind::COMMA },
-  { ';', token_kind::SEMIC },    { '^', token_kind::PTR },
-};
+const unordered_map<char, token_kind> lexer::m_single_lookup
+    = { { '+', token_kind::PLUS },     { '-', token_kind::MINUS },
+        { '*', token_kind::ASTERISK }, { '/', token_kind::SLASH },
+        { '=', token_kind::EQ },       { '[', token_kind::LBRACK },
+        { ']', token_kind::RBRACK },   { ',', token_kind::COMMA },
+        { ';', token_kind::SEMIC },    { '^', token_kind::PTR },
+        { ')', token_kind::RPAREN } };
 
 lexer::lexer (void) : m_pos (), m_target_str (), m_current (nullptr) {}
 lexer::lexer (const string &target_str)
@@ -60,14 +65,15 @@ lexer::lexer (const string &target_str)
 void
 lexer::read_file (const string &file_name)
 {
-  std::ifstream file (file_name);
-  size_t len = file.seekg (std::ios::end).tellg ();
+  std::ifstream file (file_name, std::ios::in);
+  size_t len = file.seekg (0, std::ios::end).tellg ();
   m_target_str = string (len, '\0');
   file.seekg (std::ios::beg)
       .read (const_cast<char *> (m_target_str.c_str ()), len);
   for (auto &c : m_target_str)
     c = std::tolower (static_cast<u_char> (c));
   m_current = m_target_str.c_str ();
+  std::cout << m_target_str << "\n";
 }
 
 void
@@ -99,9 +105,9 @@ lexer::skip_whitespace (void)
 }
 
 void
-lexer::skip_comment (const char start_symbol)
+lexer::skip_comment (void)
 {
-  if (start_symbol == '{')
+  if (*m_current == '{')
     {
       while (*m_current != '\0')
         {
@@ -143,9 +149,113 @@ unique_ptr<token>
 lexer::get_next (void)
 {
   skip_whitespace ();
+
   if (m_current == nullptr)
     return make_invalid (m_pos);
-  return make_invalid (m_pos);
+
+  if (*m_current == '\0')
+    return make_unique<token> (token_kind::EOF, m_pos);
+
+  if (std::isalpha (static_cast<u_char> (*m_current)))
+    return make_alnum ();
+
+  if (*m_current == '\'')
+    {
+      advance ();
+      return make_string ();
+    }
+
+  if (std::isdigit (static_cast<u_char> (*m_current)))
+    return make_number ();
+
+  return non_alnum ();
+}
+
+unique_ptr<token>
+lexer::non_alnum (void)
+{
+  unique_ptr<token> tok;
+  switch (*m_current)
+    {
+    case '+':
+    case '-':
+    case '*':
+    case '/':
+    case '=':
+    case '[':
+    case ']':
+    case ',':
+    case ';':
+    case '^':
+    case ')':
+      tok = make_length_one ();
+      break;
+    case ':':
+      if (m_current[1] == '=')
+        {
+          tok = U_TOKEN (ASGN, m_pos);
+          advance ();
+          break;
+        }
+      tok = U_TOKEN (COLON, m_pos);
+      break;
+    case '<':
+      if (m_current[1] == '>')
+        {
+          tok = U_TOKEN (NE, m_pos);
+          advance ();
+          break;
+        }
+      if (m_current[1] == '=')
+        {
+          tok = U_TOKEN (LE, m_pos);
+          advance ();
+          break;
+        }
+      tok = U_TOKEN (LT, m_pos);
+      break;
+    case '>':
+      if (m_current[1] == '=')
+        {
+          tok = U_TOKEN (GE, m_pos);
+          advance ();
+          break;
+        }
+      tok = U_TOKEN (GT, m_pos);
+      break;
+    case '.':
+      if (m_current[1] == '.')
+        {
+          tok = U_TOKEN (RANGE, m_pos);
+          advance ();
+          break;
+        }
+      tok = U_TOKEN (DOT, m_pos);
+      break;
+    case '{':
+      skip_comment ();
+      return get_next ();
+    case '(':
+      if (m_current[1] == '*')
+        {
+          advance ();
+          advance ();
+          skip_comment ();
+          return get_next ();
+        }
+      tok = U_TOKEN (LPAREN, m_pos);
+      break;
+    default:
+      return make_invalid (m_pos);
+    }
+  advance ();
+  return tok;
+}
+
+unique_ptr<token>
+lexer::make_length_one (void)
+{
+  return make_unique<token> (m_single_lookup.at (*m_current), m_pos);
 }
 
 unique_ptr<token>
@@ -195,7 +305,7 @@ lexer::make_string (void)
 {
   string str;
   position start = m_pos;
-  while (*m_current != '\0' && *m_current != '\'' && *m_current == '\n')
+  while (*m_current != '\0' && *m_current != '\'' && *m_current != '\n')
     {
       str += *m_current;
       advance ();
@@ -206,6 +316,19 @@ lexer::make_string (void)
       return make_unique<string_token> (start, str);
     }
   return make_invalid (start);
+}
+
+void
+lexer::print_remaining (void)
+{
+  unique_ptr<token> current = get_next ();
+  std::cout << "[ ";
+  while (current->get_kind () != token_kind::EOF)
+    {
+      std::cout << current->to_string () << ", ";
+      current = get_next ();
+    }
+  std::cout << current->to_string () << " ]\n";
 }
 
 } // namespace euclid
