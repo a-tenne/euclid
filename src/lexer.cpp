@@ -283,6 +283,8 @@ lexer::make_number (void)
   while (std::isdigit (static_cast<u_char> (*m_current)) || *m_current == 'e'
          || *m_current == '-' || *m_current == '+' || *m_current == '.')
     {
+      if (*m_current == '.' && m_current[1] == '.')
+        break;
       num_str += *m_current;
       advance ();
     }
@@ -325,6 +327,13 @@ lexer::print_remaining (void)
   std::cout << "[ ";
   while (current->get_kind () != token_kind::EOF)
     {
+      if (current->get_kind () == token_kind::INVALID)
+        {
+          position pos = current->get_pos ();
+          std::cout << "Invalid token on line " << pos.get_row () << " column "
+                    << pos.get_col () << ".\n";
+          return;
+        }
       std::cout << current->to_string () << ", ";
       current = get_next ();
     }
