@@ -24,6 +24,9 @@ private:
   static const std::map<std::string, token_kind> m_keyword_lookup;
   static const std::unordered_map<char, token_kind> m_single_lookup;
 
+  inline bool is_number_char (void);
+  inline bool check_next (const char next, token_kind set_to,
+                          std::unique_ptr<token> &tok);
   void advance (void);
   void skip_whitespace (void);
   void skip_comment (void);

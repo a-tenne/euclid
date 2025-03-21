@@ -3,7 +3,7 @@
 #include <iostream>
 
 #define U_TOKEN(_token, position)                                             \
-  make_unique<token> (token_kind::_token, position)
+  (make_unique<token> (token_kind::_token, position))
 
 namespace euclid
 {
@@ -170,6 +170,18 @@ lexer::get_next (void)
   return non_alnum ();
 }
 
+inline bool
+lexer::check_next (const char next, token_kind set_to, unique_ptr<token> &tok)
+{
+  if (m_current[1] == next)
+    {
+      tok = make_unique<token> (set_to, m_pos);
+      advance ();
+      return true;
+    }
+  return false;
+}
+
 unique_ptr<token>
 lexer::non_alnum (void)
 {
@@ -190,45 +202,25 @@ lexer::non_alnum (void)
       tok = make_length_one ();
       break;
     case ':':
-      if (m_current[1] == '=')
-        {
-          tok = U_TOKEN (ASGN, m_pos);
-          advance ();
-          break;
-        }
+      if (check_next ('=', token_kind::ASGN, tok))
+        break;
       tok = U_TOKEN (COLON, m_pos);
       break;
     case '<':
-      if (m_current[1] == '>')
-        {
-          tok = U_TOKEN (NE, m_pos);
-          advance ();
-          break;
-        }
-      if (m_current[1] == '=')
-        {
-          tok = U_TOKEN (LE, m_pos);
-          advance ();
-          break;
-        }
+      if (check_next ('>', token_kind::NE, tok))
+        break;
+      if (check_next ('=', token_kind::LE, tok))
+        break;
       tok = U_TOKEN (LT, m_pos);
       break;
     case '>':
-      if (m_current[1] == '=')
-        {
-          tok = U_TOKEN (GE, m_pos);
-          advance ();
-          break;
-        }
+      if (check_next ('=', token_kind::GE, tok))
+        break;
       tok = U_TOKEN (GT, m_pos);
       break;
     case '.':
-      if (m_current[1] == '.')
-        {
-          tok = U_TOKEN (RANGE, m_pos);
-          advance ();
-          break;
-        }
+      if (check_next ('.', token_kind::RANGE, tok))
+        break;
       tok = U_TOKEN (DOT, m_pos);
       break;
     case '{':
@@ -275,13 +267,19 @@ lexer::make_alnum (void)
   return make_unique<ident_token> (start, str);
 }
 
+inline bool
+lexer::is_number_char (void)
+{
+  return std::isdigit (static_cast<u_char> (*m_current)) || *m_current == 'e'
+         || *m_current == '-' || *m_current == '+' || *m_current == '.';
+}
+
 unique_ptr<token>
 lexer::make_number (void)
 {
   string num_str;
   position start = m_pos;
-  while (std::isdigit (static_cast<u_char> (*m_current)) || *m_current == 'e'
-         || *m_current == '-' || *m_current == '+' || *m_current == '.')
+  while (is_number_char ())
     {
       if (*m_current == '.' && m_current[1] == '.')
         break;
