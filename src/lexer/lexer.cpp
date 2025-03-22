@@ -48,13 +48,14 @@ const map<string, token_kind> lexer::m_keyword_lookup
         { "var", token_kind::VAR },
         { "while", token_kind::WHILE },
         { "with", token_kind::WITH } };
-const unordered_map<char, token_kind> lexer::m_single_lookup
-    = { { '+', token_kind::PLUS },     { '-', token_kind::MINUS },
-        { '*', token_kind::ASTERISK }, { '/', token_kind::SLASH },
-        { '=', token_kind::EQ },       { '[', token_kind::LBRACK },
-        { ']', token_kind::RBRACK },   { ',', token_kind::COMMA },
-        { ';', token_kind::SEMIC },    { '^', token_kind::PTR },
-        { ')', token_kind::RPAREN } };
+const unordered_map<char, token_kind> lexer::m_single_lookup = {
+  { '+', token_kind::PLUS },     { '-', token_kind::MINUS },
+  { '*', token_kind::ASTERISK }, { '/', token_kind::SLASH },
+  { '=', token_kind::EQ },       { '[', token_kind::LBRACK },
+  { ']', token_kind::RBRACK },   { ',', token_kind::COMMA },
+  { ';', token_kind::SEMIC },    { '^', token_kind::PTR },
+  { ')', token_kind::RPAREN },
+};
 
 lexer::lexer (void) : m_pos (), m_target_str (), m_current (nullptr) {}
 lexer::lexer (const string &target_str)
