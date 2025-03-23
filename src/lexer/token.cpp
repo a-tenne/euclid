@@ -3,7 +3,7 @@
 namespace euclid
 {
 
-using std::string;
+using std::string, std::variant, std::get, std::get_if;
 
 const std::unordered_map<token_kind, string> token::str_lookup = {
   LOOKUP_ENTRY (INVALID),  LOOKUP_ENTRY (AND),        LOOKUP_ENTRY (ARRAY),
@@ -32,7 +32,10 @@ const std::unordered_map<token_kind, string> token::str_lookup = {
 
 token::token (position pos) : m_kind (token_kind::INVALID), m_pos (pos) {}
 
-token::token (token_kind kind, position pos) : m_kind (kind), m_pos (pos) {}
+token::token (token_kind kind, const position &pos)
+    : m_kind (kind), m_pos (pos)
+{
+}
 
 token_kind
 token::get_kind (void) const
@@ -51,7 +54,7 @@ token::to_string (void) const
   return str_lookup.at (m_kind);
 }
 
-bool_token::bool_token (position pos, bool value)
+/* bool_token::bool_token (position pos, bool value)
     : token (token_kind::BOOL_LIT, pos), m_value (value)
 {
 }
@@ -117,7 +120,7 @@ string
 string_token::to_string (void) const
 {
   return token::to_string () + ": '" + m_value + "'";
-}
+} */
 
 ident_token::ident_token (position pos, const string &name)
     : token (token_kind::IDENT, pos), m_name (name)
@@ -134,6 +137,41 @@ string
 ident_token::to_string (void) const
 {
   return token::to_string () + ": " + m_name;
+}
+
+literal_token::literal_token (token_kind kind,
+                              variant<int, float, bool, string> value,
+                              const position &pos)
+    : m_value (value), token (kind, pos)
+{
+}
+
+string
+literal_token::to_string (void) const
+{
+  string str = token::to_string () + ": ";
+  if (const int *ptr = get_if<int> (&m_value))
+    {
+      str += std::to_string (*ptr);
+    }
+  else if (const float *ptr = get_if<float> (&m_value))
+    {
+      str += std::to_string (*ptr);
+    }
+  else if (const bool *ptr = get_if<bool> (&m_value))
+    {
+      str += *ptr ? "true" : "false";
+    }
+  else
+    {
+      str += '\'' + get<string> (m_value) + '\'';
+    }
+  return str;
+}
+const std::variant<int, float, bool, std::string> &
+literal_token::get_value (void) const
+{
+  return m_value;
 }
 
 } // namespace euclid

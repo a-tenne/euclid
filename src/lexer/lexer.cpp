@@ -264,7 +264,8 @@ lexer::make_alnum (void)
   if (it != m_keyword_lookup.end ())
     return make_unique<token> (it->second, start);
   if (str == "false" || str == "true")
-    return make_unique<bool_token> (start, str == "true");
+    return make_unique<literal_token> (token_kind::BOOL_LIT, str == "true",
+                                       start);
   return make_unique<ident_token> (start, str);
 }
 
@@ -288,9 +289,11 @@ lexer::make_number (void)
       advance ();
     }
   if (regex_match (num_str, m_real_regex))
-    return make_unique<real_token> (start, std::stof (num_str));
+    return make_unique<literal_token> (token_kind::REAL_LIT,
+                                       std::stof (num_str), start);
   if (regex_match (num_str, m_int_regex))
-    return make_unique<int_token> (start, std::stoi (num_str));
+    return make_unique<literal_token> (token_kind::INT_LIT,
+                                       std::stoi (num_str), start);
 
   return make_invalid (start);
 }
@@ -314,7 +317,7 @@ lexer::make_string (void)
   if (*m_current == '\'')
     {
       advance ();
-      return make_unique<string_token> (start, str);
+      return make_unique<literal_token> (token_kind::STRING_LIT, str, start);
     }
   return make_invalid (start);
 }
