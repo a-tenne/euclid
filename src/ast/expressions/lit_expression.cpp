@@ -35,7 +35,7 @@ literal_expression::print_variant (void) const
 void
 literal_expression::print (void) const
 {
-  cout << "literal expression (";
+  cout << "literal expression (\n";
   print_variant ();
   cout << ")\n";
 }
