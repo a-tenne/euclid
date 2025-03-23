@@ -14,7 +14,7 @@ public:
   literal_expression (
       const std::variant<int, float, bool, std::string> &literal,
       const position &pos);
-  void print (void) const override;
+  void print (uint indent) const override;
   const std::variant<int, float, bool, std::string> &get_literal (void) const;
 
 private:

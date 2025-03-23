@@ -33,10 +33,13 @@ literal_expression::print_variant (void) const
 }
 
 void
-literal_expression::print (void) const
+literal_expression::print (uint indent) const
 {
+  print_indent (indent);
   cout << "literal expression (\n";
+  print_indent (indent + 1);
   print_variant ();
+  print_indent (indent);
   cout << ")\n";
 }
 } // namespace euclid

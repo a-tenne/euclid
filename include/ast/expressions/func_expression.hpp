@@ -8,6 +8,10 @@ namespace euclid
 {
 class function_expression : public expression
 {
+public:
+  function_expression (std::vector<std::unique_ptr<expression> > &&params,
+                       const std::string &ident, const position &pos);
+  void print (uint indent) const override;
 
 private:
   std::string m_ident;

@@ -17,6 +17,7 @@ class unary_expression : public expression
   unary_expression (unary_operator op, std::unique_ptr<expression> right,
                     const position &pos);
   const expression &get_right (void) const;
+  void print (uint indent) const override;
 
 private:
   std::unique_ptr<expression> m_right;
