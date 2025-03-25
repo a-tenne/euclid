@@ -1,16 +1,24 @@
 #include "program.hpp"
 #include <iostream>
+#include <memory>
 
 namespace euclid
 {
-using std::cout, std::string;
-program::program (const string &name, const block &_block)
-    : m_name (name), m_block (_block)
+using std::cout, std::string, std::move;
+
+void
+program::set_name (string &&name)
 {
+  m_name = move (name);
+}
+void
+program::set_block (block &&_block)
+{
+  m_block = move (_block);
 }
 
 void
-program::print (uint indent = 0) const
+program::print (uint indent) const
 {
   print_indent (indent);
   cout << "program " << m_name << " (\n";

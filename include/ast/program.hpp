@@ -8,8 +8,9 @@ namespace euclid
 class program : public ast_node
 {
 public:
-  program (const std::string &name, const block &_block);
   void print (uint indent) const override;
+  void set_name (std::string &&name);
+  void set_block (block &&_block);
 
 private:
   std::string m_name;

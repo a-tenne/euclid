@@ -331,9 +331,7 @@ lexer::print_remaining (void)
     {
       if (current->get_kind () == token_kind::INVALID)
         {
-          position pos = current->get_pos ();
-          std::cout << "Invalid token on line " << pos.get_row () << " column "
-                    << pos.get_col () << ".\n";
+          std::cerr << current->to_string ();
           return;
         }
       std::cout << current->to_string () << ", ";

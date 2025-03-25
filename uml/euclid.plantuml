@@ -9,15 +9,31 @@ class compiler {
 }
 
 class token {
-
+    + token(token_kind kind, const position &pos)
+    + token_kind get_kind(void)
+    + const position &get_pos(void)
+    + std::string to_string(void)
+    
+    # token(const position &pos)
+    # token_kind kind
+    # position pos
+    # {static} const std::unordered_map<token_kind, std::string> str_lookup
 }
 
 class literal_token {
+    + literal_token (token_kind kind,
+                 std::variant<int, float, bool, std::string> value,
+                 const position &pos)
+    + const std::variant<int, float, bool, std::string> &get_value(void)
 
+    - std::variant<int, float, bool, std::string> value
 }
 
 class ident_token {
-
+    + ident_token(const position &pos, const std::string &name)
+    + const std::string &get_name(void)
+    
+    - std::string name
 }
 
 class position {
@@ -38,9 +54,34 @@ class lexer {
 + std::unique_ptr<token> get_next(void)
 + void read_file(const std::string &file_name)
 + void print_remaining(void)
+
+- const char *current
+- std::string target_str
+- {static} const std::regex int_regex, real_regex
+- {static} const std::map<std::string, token_kind> keyword_lookup
+- {static} const std::unordered_map<char, token_kind> single_lookup
+
+- bool is_number_char (void);
+- bool check_next (const char next, token_kind set_to,
+                          std::unique_ptr<token> &tok)
+- void advance (void)
+- void skip_whitespace (void)
+- void skip_comment (void)
+- std::unique_ptr<token> non_alnum (void)
+- std::unique_ptr<token> make_length_one (void)
+- std::unique_ptr<token> make_invalid (const position &pos)
+- std::unique_ptr<token> make_alnum (void)
+- std::unique_ptr<token> make_number (void)
+- std::unique_ptr<token> make_string (void)
 }
 
 class program {
++ program(const std::string &name, const block &_block)
+
+- std::string name
+}
+
+class block {
 
 }
 
@@ -57,7 +98,6 @@ token <|-- literal_token
 token <|-- ident_token
 program "1"*-- parser
 parser "1"*-- compiler
-
 
 }
 @enduml

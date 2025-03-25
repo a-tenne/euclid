@@ -1,4 +1,5 @@
 #include "token.hpp"
+#include <iostream>
 #define LOOKUP_ENTRY(TOKEN) { token_kind::TOKEN, #TOKEN }
 namespace euclid
 {
@@ -48,10 +49,36 @@ token::get_pos (void) const
   return m_pos;
 }
 
+void
+token::check_invalid (void) const
+{
+  if (get_kind () == token_kind::INVALID)
+    {
+      std::cerr << to_string ();
+      std::exit (1);
+    }
+}
+
+void
+token::check_unexpected (token_kind kind) const
+{
+  check_invalid ();
+  if (m_kind != kind)
+    {
+      std::cerr << "Unexpected token on line " << m_pos.get_row ()
+                << " column " << m_pos.get_col ()
+                << ".\nExpected: " << look_up (kind) << '\n';
+      std::exit (1);
+    }
+}
+
 string
 token::to_string (void) const
 {
-  return str_lookup.at (m_kind);
+  if (m_kind == token_kind::INVALID)
+    return "Invalid token on line " + std::to_string (m_pos.get_row ())
+           + " column " + std::to_string (m_pos.get_col ()) + ".\n";
+  return look_up (m_kind);
 }
 
 ident_token::ident_token (position pos, const string &name)

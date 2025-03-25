@@ -1,4 +1,4 @@
-#include "lexer.hpp"
+#include "parser.hpp"
 #include <iostream>
 
 int
@@ -10,7 +10,7 @@ main (int argc, char const *argv[])
                 << " <input-file>\n";
       exit (1);
     }
-  auto lexer = euclid::lexer ();
-  lexer.read_file (argv[1]);
-  lexer.print_remaining ();
+  auto parser = euclid::parser ();
+  parser.parse_file (argv[1]);
+  parser.print_program ();
 }

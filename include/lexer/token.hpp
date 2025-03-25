@@ -83,7 +83,14 @@ public:
   token (token_kind kind, const position &pos);
   token_kind get_kind (void) const;
   const position &get_pos (void) const;
+  void check_invalid (void) const;
+  void check_unexpected (token_kind kind) const;
   virtual std::string to_string (void) const;
+  inline static const std::string &
+  look_up (token_kind kind)
+  {
+    return str_lookup.at (kind);
+  }
 
 protected:
   token (position pos);
