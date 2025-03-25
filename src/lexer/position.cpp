@@ -3,7 +3,7 @@
 namespace euclid
 {
 
-position::position () : m_col (1), m_row (1) {}
+position::position (void) : m_col (1), m_row (1) {}
 
 position::position (int row, int col) : m_col (col), m_row (row) {}
 

@@ -1,0 +1,63 @@
+@startuml euclid
+namespace euclid {
+
+enum token_kind {
+}
+
+class compiler {
+
+}
+
+class token {
+
+}
+
+class literal_token {
+
+}
+
+class ident_token {
+
+}
+
+class position {
++ position(void)
++ position(int row, int col)
++ int get_col()
++ int get_row()
++ void incr_col()
++ void incr_row()
+- int col
+- int row
+
+}
+
+class lexer {
++ lexer(void)
++ lexer(const std::string &target_str)
++ std::unique_ptr<token> get_next(void)
++ void read_file(const std::string &file_name)
++ void print_remaining(void)
+}
+
+class program {
+
+}
+
+class parser {
+
+}
+
+token_kind "1"*-- token
+position "1"<-- token
+position "1"<-- parser
+lexer "1"*-- parser
+token "1"<-- parser
+token <|-- literal_token
+token <|-- ident_token
+program "1"*-- parser
+parser "1"*-- compiler
+
+
+}
+@enduml

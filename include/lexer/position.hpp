@@ -6,7 +6,7 @@ namespace euclid
 class position
 {
 public:
-  position ();
+  position (void);
   position (int row, int col);
   int get_col () const;
   int get_row () const;
