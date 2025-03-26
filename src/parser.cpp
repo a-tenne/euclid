@@ -4,7 +4,7 @@
 namespace euclid
 {
 using std::move, std::unique_ptr, std::string, std::get;
-parser::parser () : m_lexer (), m_current (nullptr) {}
+parser::parser () : m_lexer (), m_current (nullptr), m_program () {}
 
 void
 parser::parse_file (const std::string &file_name)

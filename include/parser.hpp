@@ -17,7 +17,7 @@ public:
 private:
   lexer m_lexer;
   program m_program;
-  std::unique_ptr<token> m_current, m_lookahead1;
+  std::unique_ptr<token> m_current;
 
   void parse_program (void);
 };
