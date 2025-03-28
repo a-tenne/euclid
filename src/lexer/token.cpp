@@ -58,18 +58,39 @@ token::check_invalid (void) const
       std::exit (1);
     }
 }
-
 void
 token::check_unexpected (token_kind kind) const
 {
   check_invalid ();
-  if (m_kind != kind)
+  if (kind != m_kind)
     {
       std::cerr << "Unexpected token on line " << m_pos.get_row ()
                 << " column " << m_pos.get_col ()
                 << ".\nExpected: " << look_up (kind) << '\n';
       std::exit (1);
     }
+}
+
+void
+token::check_unexpected (const std::vector<token_kind> &kinds) const
+{
+  check_invalid ();
+  for (auto &kind : kinds)
+    {
+      if (kind == m_kind)
+        return;
+    }
+
+  std::cerr << "Unexpected token on line " << m_pos.get_row () << " column "
+            << m_pos.get_col () << ".\nExpected one of: ";
+  for (size_t i = 0; i < kinds.size (); ++i)
+    {
+      std::cerr << look_up (kinds[i]);
+      if (i + 1 < kinds.size ())
+        std::cerr << ", ";
+    }
+  std::cerr << '\n';
+  std::exit (1);
 }
 
 string
@@ -84,12 +105,6 @@ token::to_string (void) const
 ident_token::ident_token (position pos, const string &name)
     : token (token_kind::IDENT, pos), m_name (name)
 {
-}
-
-const string &
-ident_token::get_name (void) const
-{
-  return m_name;
 }
 
 string

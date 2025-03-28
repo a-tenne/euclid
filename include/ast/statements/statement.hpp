@@ -23,12 +23,17 @@ enum class statement_kind
 class statement : public ast_node
 {
 public:
-  statement () = default;
-  statement (statement_kind kind, int line);
+  statement () = delete;
+  statement (statement_kind kind);
 
-private:
+  statement_kind
+  get_kind ()
+  {
+    return m_kind;
+  }
+
+protected:
   statement_kind m_kind;
-  int m_line;
 };
 } // namespace euclid
 

@@ -3,7 +3,8 @@
 
 namespace euclid
 {
-using std::move, std::unique_ptr, std::string, std::get;
+using std::make_unique, std::move, std::unique_ptr, std::string, std::get,
+    std::vector, std::unique_ptr;
 parser::parser () : m_lexer (), m_current (nullptr), m_program () {}
 
 void
@@ -14,50 +15,110 @@ parser::parse_file (const std::string &file_name)
 }
 
 void
-parser::print_program (void) const
+parser::print_program () const
 {
   m_program.print (0);
 }
 
 void
-parser::not_implemented (void) const
+parser::not_implemented () const
 {
   std::cerr << "Not implemented: " << token::look_up (m_current->get_kind ())
-            << "\n";
+            << ".\n";
   std::exit (1);
 }
 
-void
-parser::parse_program (void)
+unique_ptr<expression>
+parser::parse_expression ()
 {
+  unique_ptr<expression> ret;
+  return ret;
+}
 
-  m_current = m_lexer.get_next ();
-  m_current->check_unexpected (token_kind::PROGRAM);
-  m_current = m_lexer.get_next ();
-  m_current->check_unexpected (token_kind::IDENT);
-  auto prog_name = static_cast<ident_token *> (m_current.get ())->get_name ();
-  m_program.set_name (move (prog_name));
-  m_current = m_lexer.get_next ();
-  m_current->check_unexpected (token_kind::SEMIC);
+unique_ptr<assign_statement>
+parser::parse_assign ()
+{
+  auto ret = make_unique<assign_statement> (
+      move (static_cast<ident_token *> (m_current.get ())->get_name ()));
+  return ret;
+}
+
+unique_ptr<compound_statement>
+parser::parse_compound ()
+{
+  static const vector<token_kind> expected_tokens = {
+    token_kind::IDENT,
+  };
+  auto ret = make_unique<compound_statement> ();
+  consume ();
+  m_current->check_unexpected (expected_tokens);
+  unique_ptr<statement> stmt;
+  switch (m_current->get_kind ())
+    {
+    case token_kind::IDENT:
+      consume ();
+      m_current->check_unexpected (token_kind::ASGN);
+      ret->append (parse_assign ());
+      break;
+    default:
+      not_implemented ();
+    }
+  return ret;
+}
+
+unique_ptr<block>
+parser::parse_block (bool is_main)
+{
+  auto ret = make_unique<block> ();
+  static const vector<token_kind> expected_tokens
+      = { token_kind::BEGIN, token_kind::TYPE, token_kind::VAR,
+          token_kind::CONST, token_kind::PROC };
   while ((m_current = m_lexer.get_next ())->get_kind () != token_kind::EOF)
     {
       m_current->check_invalid ();
-      token_kind kind = m_current->get_kind ();
-      switch (kind)
+      m_current->check_unexpected (expected_tokens);
+      switch (m_current->get_kind ())
         {
         case token_kind::BEGIN:
-          m_current = m_lexer.get_next ();
-          kind = m_current->get_kind ();
+          ret->set_stmt_part (parse_compound ());
+          consume ();
           m_current->check_unexpected (token_kind::END);
-          m_current = m_lexer.get_next ();
-          kind = m_current->get_kind ();
-          m_current->check_unexpected (token_kind::DOT);
-          return;
+          consume ();
+          m_current->check_unexpected (is_main ? token_kind::DOT
+                                               : token_kind::SEMIC);
+          return ret;
+        case token_kind::TYPE:
+          not_implemented ();
           break;
-        default:
+        case token_kind::VAR:
+          not_implemented ();
+          break;
+        case token_kind::CONST:
+          not_implemented ();
+          break;
+        case token_kind::FUNCTION:
+          not_implemented ();
+          break;
+        case token_kind::PROC:
           not_implemented ();
           break;
         }
     }
+  std::cerr << "Error: Missing statements\n";
+  std::exit (1);
+}
+
+void
+parser::parse_program ()
+{
+  consume ();
+  m_current->check_unexpected (token_kind::PROGRAM);
+  consume ();
+  m_current->check_unexpected (token_kind::IDENT);
+  auto prog_name = static_cast<ident_token *> (m_current.get ())->get_name ();
+  m_program.set_name (move (prog_name));
+  consume ();
+  m_current->check_unexpected (token_kind::SEMIC);
+  m_program.set_block (parse_block (true));
 }
 } // namespace euclid

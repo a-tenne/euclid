@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <variant>
+#include <vector>
 #undef EOF
 namespace euclid
 {
@@ -85,6 +86,7 @@ public:
   const position &get_pos (void) const;
   void check_invalid (void) const;
   void check_unexpected (token_kind kind) const;
+  void check_unexpected (const std::vector<token_kind> &kinds) const;
   virtual std::string to_string (void) const;
   inline static const std::string &
   look_up (token_kind kind)
@@ -117,7 +119,11 @@ class ident_token : public token
 {
 public:
   ident_token (position pos, const std::string &name);
-  const std::string &get_name (void) const;
+  std::string &
+  get_name (void)
+  {
+    return m_name;
+  }
   std::string to_string (void) const override;
 
 private:

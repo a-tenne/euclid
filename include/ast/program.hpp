@@ -8,14 +8,13 @@ namespace euclid
 class program : public ast_node
 {
 public:
-  program () = default;
   void print (uint indent) const override;
   void set_name (std::string &&name);
-  void set_block (block &&_block);
+  void set_block (std::unique_ptr<block> &&inner);
 
 private:
   std::string m_name;
-  block m_block;
+  std::unique_ptr<block> m_inner;
 };
 } // namespace euclid
 
