@@ -118,43 +118,24 @@ literal_token::literal_token (token_kind kind,
                               const position &pos)
     : m_value (value), token (kind, pos)
 {
-  switch (kind)
-    {
-    case token_kind::STRING_LIT:
-      m_lit_kind = literal_kind::STRING;
-      break;
-    case token_kind::INT_LIT:
-      m_lit_kind = literal_kind::INTEGER;
-      break;
-    case token_kind::REAL_LIT:
-      m_lit_kind = literal_kind::REAL;
-      break;
-    case token_kind::BOOL_LIT:
-      m_lit_kind = literal_kind::BOOLEAN;
-      break;
-    default:
-      std::cerr << "Wrong token kind in literal_token constructor: "
-                << look_up (kind) << ".\n";
-      std::exit (1);
-    }
 }
 
 string
 literal_token::to_string (void) const
 {
   string str = token::to_string () + ": ";
-  switch (m_lit_kind)
+  switch (m_kind)
     {
-    case literal_kind::STRING:
+    case token_kind::STRING_LIT:
       str += '\'' + get<string> (m_value) + '\'';
       break;
-    case literal_kind::INTEGER:
+    case token_kind::INT_LIT:
       str += std::to_string (get<int> (m_value));
       break;
-    case literal_kind::REAL:
+    case token_kind::REAL_LIT:
       str += std::to_string (get<float> (m_value));
       break;
-    case literal_kind::BOOLEAN:
+    case token_kind::BOOL_LIT:
       str += get<bool> (m_value) ? "true" : "false";
       break;
     }

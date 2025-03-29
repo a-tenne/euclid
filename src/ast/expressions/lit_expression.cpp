@@ -5,29 +5,44 @@ namespace euclid
 {
 using std::string, std::cout, std::get_if, std::get;
 literal_expression::literal_expression (
-    const std::variant<int, float, bool, string> &literal, const position &pos)
-    : m_literal (literal), expression (expression_kind::LITERAL, pos)
+    const std::unique_ptr<literal_token> &lit_token)
+    : m_literal (lit_token->get_value ()),
+      expression (expression_kind::LITERAL, lit_token->get_pos ())
 {
+  switch (lit_token->get_kind ())
+    {
+    case token_kind::STRING_LIT:
+      m_kind = literal_kind::STRING;
+      break;
+    case token_kind::INT_LIT:
+      m_kind = literal_kind::INTEGER;
+      break;
+    case token_kind::REAL_LIT:
+      m_kind = literal_kind::REAL;
+      break;
+    case token_kind::BOOL_LIT:
+      m_kind = literal_kind::BOOLEAN;
+      break;
+    }
 }
 
 void
-literal_expression::print_variant (void) const
+literal_expression::print_variant () const
 {
-  if (const int *ptr = get_if<int> (&m_literal))
+  switch (m_kind)
     {
-      cout << *ptr;
-    }
-  else if (const float *ptr = get_if<float> (&m_literal))
-    {
-      cout << *ptr;
-    }
-  else if (const bool *ptr = get_if<bool> (&m_literal))
-    {
-      cout << *ptr;
-    }
-  else
-    {
+    case literal_kind::STRING:
       cout << get<string> (m_literal);
+      break;
+    case literal_kind::INTEGER:
+      cout << get<int> (m_literal);
+      break;
+    case literal_kind::REAL:
+      cout << get<float> (m_literal);
+      break;
+    case literal_kind::BOOLEAN:
+      cout << get<bool> (m_literal) ? "true" : "false";
+      break;
     }
   cout << '\n';
 }

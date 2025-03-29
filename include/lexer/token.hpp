@@ -105,13 +105,6 @@ protected:
 class literal_token : public token
 {
 public:
-  enum class literal_kind
-  {
-    INTEGER,
-    REAL,
-    BOOLEAN,
-    STRING
-  };
   literal_token () = delete;
   literal_token (token_kind kind,
                  std::variant<int, float, bool, std::string> value,
@@ -120,7 +113,6 @@ public:
   std::string to_string (void) const override;
 
 private:
-  literal_kind m_lit_kind;
   std::variant<int, float, bool, std::string> m_value;
 };
 
