@@ -20,7 +20,7 @@ public:
 private:
   lexer m_lexer;
   program m_program;
-  std::unique_ptr<token> m_current;
+  std::unique_ptr<token> m_current, m_l1;
 
   void parse_program ();
   std::unique_ptr<block> parse_block (bool is_main);

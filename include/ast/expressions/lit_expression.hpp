@@ -19,7 +19,7 @@ class literal_expression : public expression
 {
 
 public:
-  literal_expression (const std::unique_ptr<literal_token> &lit_token);
+  literal_expression (const literal_token &lit_token);
   void print (uint indent) const override;
 
   const std::variant<int, float, bool, std::string> &

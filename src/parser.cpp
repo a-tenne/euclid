@@ -1,7 +1,7 @@
 #include "parser.hpp"
+#include "lit_expression.hpp"
 #include <array>
 #include <iostream>
-#include <span>
 
 namespace euclid
 {
@@ -40,6 +40,22 @@ unique_ptr<expression>
 parser::parse_expression ()
 {
   unique_ptr<expression> ret;
+  consume ();
+  switch (m_current->get_kind ())
+    {
+    case token_kind::INT_LIT:
+    case token_kind::STRING_LIT:
+    case token_kind::BOOL_LIT:
+    case token_kind::REAL_LIT:
+      m_l1 = m_lexer.get_next ();
+      m_l1->check_unexpected (token_kind::SEMIC);
+      ret = make_unique<literal_expression> (
+          *static_cast<literal_token *> (m_current.get ()));
+      break;
+    default:
+      not_implemented ();
+    }
+
   return ret;
 }
 
@@ -48,28 +64,39 @@ parser::parse_assign ()
 {
   auto ret = make_unique<assign_statement> (
       move (static_cast<ident_token *> (m_current.get ())->get_name ()));
+  ret->set_right (parse_expression ());
   return ret;
 }
 
 unique_ptr<compound_statement>
 parser::parse_compound ()
 {
-  static array<token_kind, 1> expected_tokens = {
+  static array<token_kind, 2> expected_tokens = {
     token_kind::IDENT,
+    token_kind::BEGIN,
   };
   auto ret = make_unique<compound_statement> ();
   consume ();
-  m_current->check_unexpected (expected_tokens);
-  unique_ptr<statement> stmt;
-  switch (m_current->get_kind ())
+  while (m_current->get_kind () != token_kind::END)
     {
-    case token_kind::IDENT:
+      m_current->check_unexpected (expected_tokens);
+
+      switch (m_current->get_kind ())
+        {
+        case token_kind::IDENT:
+          m_l1 = m_lexer.get_next ();
+          m_l1->check_unexpected (token_kind::ASGN);
+          ret->append (parse_assign ());
+          break;
+        case token_kind::BEGIN:
+          ret->append (parse_compound ());
+          consume ();
+          m_current->check_unexpected (token_kind::SEMIC);
+          break;
+        default:
+          not_implemented ();
+        }
       consume ();
-      m_current->check_unexpected (token_kind::ASGN);
-      ret->append (parse_assign ());
-      break;
-    default:
-      not_implemented ();
     }
   return ret;
 }
@@ -89,8 +116,6 @@ parser::parse_block (bool is_main)
         {
         case token_kind::BEGIN:
           ret->set_stmt_part (parse_compound ());
-          consume ();
-          m_current->check_unexpected (token_kind::END);
           consume ();
           m_current->check_unexpected (is_main ? token_kind::DOT
                                                : token_kind::SEMIC);

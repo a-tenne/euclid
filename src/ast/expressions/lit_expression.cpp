@@ -3,13 +3,12 @@
 
 namespace euclid
 {
-using std::string, std::cout, std::get_if, std::get;
-literal_expression::literal_expression (
-    const std::unique_ptr<literal_token> &lit_token)
-    : m_literal (lit_token->get_value ()),
-      expression (expression_kind::LITERAL, lit_token->get_pos ())
+using std::string, std::cout, std::get;
+literal_expression::literal_expression (const literal_token &lit_token)
+    : m_literal (lit_token.get_value ()),
+      expression (expression_kind::LITERAL, lit_token.get_pos ())
 {
-  switch (lit_token->get_kind ())
+  switch (lit_token.get_kind ())
     {
     case token_kind::STRING_LIT:
       m_kind = literal_kind::STRING;
@@ -32,7 +31,7 @@ literal_expression::print_variant () const
   switch (m_kind)
     {
     case literal_kind::STRING:
-      cout << get<string> (m_literal);
+      cout << '\'' << get<string> (m_literal) << '\'';
       break;
     case literal_kind::INTEGER:
       cout << get<int> (m_literal);
@@ -41,7 +40,7 @@ literal_expression::print_variant () const
       cout << get<float> (m_literal);
       break;
     case literal_kind::BOOLEAN:
-      cout << get<bool> (m_literal) ? "true" : "false";
+      cout << (get<bool> (m_literal) ? "true" : "false");
       break;
     }
   cout << '\n';
