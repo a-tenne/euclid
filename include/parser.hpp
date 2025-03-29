@@ -11,8 +11,9 @@ namespace euclid
 class parser
 {
 public:
-  parser ();
-  void parse_file (const std::string &file_name);
+  parser () = default;
+  void parse_string (const std::string &target_str);
+  void parse_file (std::string_view file_name);
   void print_program () const;
   void not_implemented () const;
 

@@ -1,6 +1,6 @@
 # Euclid - a simple [Pascal](<https://en.wikipedia.org/wiki/Pascal_(programming_language)>) compiler
 
-Euclid is written in C++17 using CMake.
+Euclid is written in C++20 using CMake.
 
 This is an ongoing project.
 

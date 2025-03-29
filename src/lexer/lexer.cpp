@@ -8,7 +8,7 @@
 namespace euclid
 {
 using std::string, std::unique_ptr, std::make_unique, std::unordered_map,
-    std::regex, std::map;
+    std::regex, std::map, std::string_view;
 
 const regex lexer::m_int_regex = regex (R"(^\d+$)");
 const regex lexer::m_real_regex = regex (R"(^\d+\.\d+(e[\+-]?\d+)?$)");
@@ -57,16 +57,15 @@ const unordered_map<char, token_kind> lexer::m_single_lookup = {
   { ')', token_kind::RPAREN },
 };
 
-lexer::lexer (void) : m_pos (), m_target_str (), m_current (nullptr) {}
-lexer::lexer (const string &target_str)
+lexer::lexer (string_view target_str)
     : m_pos (), m_target_str (target_str), m_current (m_target_str.c_str ())
 {
 }
 
 void
-lexer::read_file (const string &file_name)
+lexer::read_file (string_view file_name)
 {
-  std::ifstream file (file_name, std::ios::in);
+  std::ifstream file (file_name.data (), std::ios::in);
   size_t len = file.seekg (0, std::ios::end).tellg ();
   m_target_str = string (len, '\0');
   file.seekg (std::ios::beg)

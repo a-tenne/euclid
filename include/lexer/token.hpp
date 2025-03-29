@@ -1,6 +1,7 @@
 #ifndef _TOKEN_HPP
 #define _TOKEN_HPP
 #include "position.hpp"
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -86,7 +87,7 @@ public:
   const position &get_pos (void) const;
   void check_invalid (void) const;
   void check_unexpected (token_kind kind) const;
-  void check_unexpected (const std::vector<token_kind> &kinds) const;
+  void check_unexpected (std::span<token_kind> kinds) const;
   virtual std::string to_string (void) const;
   inline static const std::string &
   look_up (token_kind kind)
@@ -104,6 +105,13 @@ protected:
 class literal_token : public token
 {
 public:
+  enum class literal_kind
+  {
+    INTEGER,
+    REAL,
+    BOOLEAN,
+    STRING
+  };
   literal_token () = delete;
   literal_token (token_kind kind,
                  std::variant<int, float, bool, std::string> value,
@@ -112,12 +120,14 @@ public:
   std::string to_string (void) const override;
 
 private:
+  literal_kind m_lit_kind;
   std::variant<int, float, bool, std::string> m_value;
 };
 
 class ident_token : public token
 {
 public:
+  ident_token () = delete;
   ident_token (position pos, const std::string &name);
   std::string &
   get_name (void)

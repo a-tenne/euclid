@@ -1,16 +1,24 @@
 #include "parser.hpp"
+#include <array>
 #include <iostream>
+#include <span>
 
 namespace euclid
 {
 using std::make_unique, std::move, std::unique_ptr, std::string, std::get,
-    std::vector, std::unique_ptr;
-parser::parser () : m_lexer (), m_current (nullptr), m_program () {}
+    std::vector, std::unique_ptr, std::string_view, std::array;
 
 void
-parser::parse_file (const std::string &file_name)
+parser::parse_file (string_view file_name)
 {
   m_lexer.read_file (file_name);
+  parse_program ();
+}
+
+void
+parser::parse_string (const string &target_str)
+{
+  m_lexer = lexer (target_str);
   parse_program ();
 }
 
@@ -46,7 +54,7 @@ parser::parse_assign ()
 unique_ptr<compound_statement>
 parser::parse_compound ()
 {
-  static const vector<token_kind> expected_tokens = {
+  static array<token_kind, 1> expected_tokens = {
     token_kind::IDENT,
   };
   auto ret = make_unique<compound_statement> ();
@@ -70,7 +78,7 @@ unique_ptr<block>
 parser::parse_block (bool is_main)
 {
   auto ret = make_unique<block> ();
-  static const vector<token_kind> expected_tokens
+  static array<token_kind, 5> expected_tokens
       = { token_kind::BEGIN, token_kind::TYPE, token_kind::VAR,
           token_kind::CONST, token_kind::PROC };
   while ((m_current = m_lexer.get_next ())->get_kind () != token_kind::EOF)

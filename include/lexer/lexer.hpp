@@ -4,16 +4,17 @@
 #include <map>
 #include <memory>
 #include <regex>
+#include <string_view>
 
 namespace euclid
 {
 class lexer
 {
 public:
-  lexer (void);
-  lexer (const std::string &target_str);
+  lexer () = default;
+  lexer (std::string_view target_str);
   std::unique_ptr<token> get_next (void);
-  void read_file (const std::string &file_name);
+  void read_file (std::string_view file_name);
   void print_remaining (void);
 
 private:

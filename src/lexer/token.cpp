@@ -72,7 +72,7 @@ token::check_unexpected (token_kind kind) const
 }
 
 void
-token::check_unexpected (const std::vector<token_kind> &kinds) const
+token::check_unexpected (std::span<token_kind> kinds) const
 {
   check_invalid ();
   for (auto &kind : kinds)
@@ -118,27 +118,45 @@ literal_token::literal_token (token_kind kind,
                               const position &pos)
     : m_value (value), token (kind, pos)
 {
+  switch (kind)
+    {
+    case token_kind::STRING_LIT:
+      m_lit_kind = literal_kind::STRING;
+      break;
+    case token_kind::INT_LIT:
+      m_lit_kind = literal_kind::INTEGER;
+      break;
+    case token_kind::REAL_LIT:
+      m_lit_kind = literal_kind::REAL;
+      break;
+    case token_kind::BOOL_LIT:
+      m_lit_kind = literal_kind::BOOLEAN;
+      break;
+    default:
+      std::cerr << "Wrong token kind in literal_token constructor: "
+                << look_up (kind) << ".\n";
+      std::exit (1);
+    }
 }
 
 string
 literal_token::to_string (void) const
 {
   string str = token::to_string () + ": ";
-  if (const int *ptr = get_if<int> (&m_value))
+  switch (m_lit_kind)
     {
-      str += std::to_string (*ptr);
-    }
-  else if (const float *ptr = get_if<float> (&m_value))
-    {
-      str += std::to_string (*ptr);
-    }
-  else if (const bool *ptr = get_if<bool> (&m_value))
-    {
-      str += *ptr ? "true" : "false";
-    }
-  else
-    {
+    case literal_kind::STRING:
       str += '\'' + get<string> (m_value) + '\'';
+      break;
+    case literal_kind::INTEGER:
+      str += std::to_string (get<int> (m_value));
+      break;
+    case literal_kind::REAL:
+      str += std::to_string (get<float> (m_value));
+      break;
+    case literal_kind::BOOLEAN:
+      str += get<bool> (m_value) ? "true" : "false";
+      break;
     }
   return str;
 }
