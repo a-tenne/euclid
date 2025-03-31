@@ -3,10 +3,12 @@
 
 namespace euclid
 {
-using std::move, std::cout, std::string;
+using std::move, std::cout, std::unique_ptr;
 
-assign_statement::assign_statement (string &&left)
-    : statement (statement_kind::ASGN), m_left (move (left))
+assign_statement::assign_statement (unique_ptr<variable> &&left,
+                                    unique_ptr<expression> &&right)
+    : m_left (move (left)), m_right (move (right)),
+      statement (statement_kind::ASGN)
 {
 }
 
@@ -15,8 +17,7 @@ assign_statement::print (uint indent) const
 {
   print_indent (indent);
   cout << "assign_statement (\n";
-  print_indent (indent + 1);
-  cout << "identifier: " << m_left << '\n';
+  m_left->print (indent + 1);
   m_right->print (indent + 1);
   print_indent (indent);
   cout << ")\n";

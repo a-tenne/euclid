@@ -1,11 +1,13 @@
 #include "named_var.hpp"
 #include <iostream>
+#include <memory>
 
 namespace euclid
 {
-using std::string, std::cout;
-named_var::named_var (const string &ident, const position &pos)
-    : m_ident (ident), variable (variable_kind::NAMED, pos)
+using std::move, std::cout;
+named_var::named_var (ident_token &tok)
+    : m_ident (move (tok.get_name ())),
+      variable (variable_kind::NAMED, tok.get_pos ())
 {
 }
 

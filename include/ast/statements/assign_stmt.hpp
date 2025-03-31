@@ -2,22 +2,30 @@
 #define _ASSIGN_STMT_HPP
 #include "expression.hpp"
 #include "statement.hpp"
+#include "var.hpp"
 #include <memory>
-#include <string>
 
 namespace euclid
 {
 class assign_statement : public statement
 {
 public:
-  assign_statement (std::string &&left);
+  assign_statement (std::unique_ptr<variable> &&left,
+                    std::unique_ptr<expression> &&right);
   void print (uint indent) const override;
 
-  const std::string &
+  const variable &
   get_left () const
   {
-    return m_left;
+    return *m_left;
   }
+
+  void
+  set_left (std::unique_ptr<variable> &&left)
+  {
+    m_left = std::move (left);
+  }
+
   void
   set_right (std::unique_ptr<expression> &&right)
   {
@@ -25,7 +33,7 @@ public:
   }
 
 private:
-  std::string m_left;
+  std::unique_ptr<variable> m_left;
   std::unique_ptr<expression> m_right;
 };
 

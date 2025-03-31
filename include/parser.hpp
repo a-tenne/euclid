@@ -23,6 +23,7 @@ private:
   std::unique_ptr<token> m_current, m_l1;
 
   void parse_program ();
+  std::unique_ptr<variable> parse_variable ();
   std::unique_ptr<block> parse_block (bool is_main);
   std::unique_ptr<compound_statement> parse_compound ();
   std::unique_ptr<assign_statement> parse_assign ();

@@ -2,18 +2,17 @@
 #define _RECORD_VAR_HPP
 #include "var.hpp"
 #include <memory>
-#include <string>
 namespace euclid
 {
 class record_var : public variable
 {
 public:
-  record_var (const std::string &field, std::unique_ptr<variable> var,
-              const position &pos);
+  record_var (std::unique_ptr<variable> &&left,
+              std::unique_ptr<variable> &&right);
+  void print (uint indent) const override;
 
 private:
-  std::unique_ptr<variable> m_var;
-  std::string m_field;
+  std::unique_ptr<variable> m_left, m_right;
 };
 } // namespace euclid
 

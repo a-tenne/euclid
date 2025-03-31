@@ -1,5 +1,6 @@
 #ifndef _NAMED_VAR_HPP
 #define _NAMED_VAR_HPP
+#include "token.hpp"
 #include "var.hpp"
 #include <string>
 
@@ -8,7 +9,7 @@ namespace euclid
 class named_var : public variable
 {
 public:
-  named_var (const std::string &ident, const position &pos);
+  named_var (ident_token &tok);
   void print (uint indent) const override;
 
 private:

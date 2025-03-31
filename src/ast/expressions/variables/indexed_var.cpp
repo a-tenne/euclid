@@ -3,9 +3,9 @@
 namespace euclid
 {
 using std::unique_ptr, std::move, std::cout;
-indexed_var::indexed_var (unique_ptr<variable> var,
-                          unique_ptr<expression> index, const position &pos)
-    : variable (variable_kind::INDEXED, pos), m_var (move (var)),
+indexed_var::indexed_var (unique_ptr<variable> &&var,
+                          unique_ptr<expression> &&index)
+    : variable (variable_kind::INDEXED, var->get_pos ()), m_var (move (var)),
       m_index (move (index))
 {
 }

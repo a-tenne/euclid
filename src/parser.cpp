@@ -1,5 +1,9 @@
 #include "parser.hpp"
+#include "deref_var.hpp"
+#include "indexed_var.hpp"
 #include "lit_expression.hpp"
+#include "named_var.hpp"
+#include "record_var.hpp"
 #include <array>
 #include <iostream>
 
@@ -36,6 +40,32 @@ parser::not_implemented () const
   std::exit (1);
 }
 
+unique_ptr<variable>
+parser::parse_variable ()
+{
+  unique_ptr<variable> ret, ident;
+  m_current->check_unexpected (token_kind::IDENT);
+  ident = make_unique<named_var> (static_cast<ident_token &> (*m_current));
+  consume ();
+  switch (m_current->get_kind ())
+    {
+    case token_kind::DOT:
+      consume ();
+      ret = make_unique<record_var> (move (ident), parse_variable ());
+      break;
+    case token_kind::LBRACK:
+      ret = make_unique<indexed_var> (move (ident), parse_expression ());
+      consume ();
+      m_current->check_unexpected (token_kind::RBRACK);
+      break;
+    case token_kind::PTR:
+      ret = make_unique<deref_var> (move (ident));
+    default:
+      not_implemented ();
+    }
+  return ret;
+}
+
 unique_ptr<expression>
 parser::parse_expression ()
 {
@@ -50,7 +80,7 @@ parser::parse_expression ()
       m_l1 = m_lexer.get_next ();
       m_l1->check_unexpected (token_kind::SEMIC);
       ret = make_unique<literal_expression> (
-          *static_cast<literal_token *> (m_current.get ()));
+          static_cast<literal_token &> (*m_current));
       break;
     default:
       not_implemented ();
@@ -62,9 +92,8 @@ parser::parse_expression ()
 unique_ptr<assign_statement>
 parser::parse_assign ()
 {
-  auto ret = make_unique<assign_statement> (
-      move (static_cast<ident_token *> (m_current.get ())->get_name ()));
-  ret->set_right (parse_expression ());
+  auto ret
+      = make_unique<assign_statement> (parse_variable (), parse_expression ());
   return ret;
 }
 

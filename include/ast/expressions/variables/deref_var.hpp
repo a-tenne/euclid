@@ -7,7 +7,7 @@ namespace euclid
 class deref_var : public variable
 {
 public:
-  deref_var (std::unique_ptr<variable> var, const position &pos);
+  deref_var (std::unique_ptr<variable> &&var);
   void print (uint indent) const override;
 
 private:

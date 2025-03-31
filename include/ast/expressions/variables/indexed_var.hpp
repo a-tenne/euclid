@@ -7,8 +7,8 @@ namespace euclid
 class indexed_var : public variable
 {
 public:
-  indexed_var (std::unique_ptr<variable> var,
-               std::unique_ptr<expression> index, const position &pos);
+  indexed_var (std::unique_ptr<variable> &&var,
+               std::unique_ptr<expression> &&index);
   void print (uint indent) const override;
 
 private:
