@@ -58,7 +58,7 @@ const unordered_map<char, token_kind> lexer::m_single_lookup = {
 };
 
 lexer::lexer (string_view target_str)
-    : m_pos (), m_target_str (target_str), m_current (m_target_str.c_str ())
+    : m_pos (), m_target_str (target_str), m_current (target_str.data ())
 {
 }
 
